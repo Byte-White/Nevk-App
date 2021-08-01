@@ -11,7 +11,8 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
 
-    QPixmap pixmap("splash.png");//875,500
+    QPixmap pixmap("resources/splash.png");//875,500
+    QIcon icon("resources/icon.jpg");
     QSplashScreen splash(pixmap);
     splash.show();
     a.processEvents();
@@ -24,12 +25,12 @@ int main(int argc, char *argv[])
         QMessageBox::critical(nullptr,"Error","Could not connect to the server.");
         exit(0);
     }
-
-    check->close();
+    else check->close();
     MainWindow w;
-    QFile theme("theme.qss");
+    QFile theme("resources/theme.qss");
     theme.open(QFile::ReadOnly);
     QString theme_s = theme.readAll();
+    w.setWindowIcon(icon);
     w.setStyleSheet(theme_s);
 
     theme.close();

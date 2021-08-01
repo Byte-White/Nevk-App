@@ -6,6 +6,8 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 
+#include "nevkaprotocol.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -30,9 +32,9 @@ private slots:
 
 private:
     QString ReceivePage(QString page,bool write = true);
-    void SafeWrite(std::function<void()> func);
 private:
     Ui::MainWindow *ui;
     QTcpSocket* client;
+    NevkaProtocol protocol;
 };
 #endif // MAINWINDOW_H

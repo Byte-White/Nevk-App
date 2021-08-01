@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../build-nevkapp_client-Desktop_Qt_6_0_3_MinGW_64_bit-Debug/resources/icon.jpg</normaloff>../build-nevkapp_client-Desktop_Qt_6_0_3_MinGW_64_bit-Debug/resources/icon.jpg</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">

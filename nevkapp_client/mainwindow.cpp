@@ -4,7 +4,7 @@
 #include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent),client(new QTcpSocket(this)),protocol(client)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -20,61 +20,35 @@ MainWindow::MainWindow(QWidget *parent)
     QIcon icon("icon.jpg");
     setWindowIcon(icon);
 
-    client = new QTcpSocket(this);
-        client->connectToHost("localhost",80);
-        if(client->waitForConnected(3000))
+        QString msg = protocol.SendRequest("/");//Gets all files list.
+        if(msg != "")
         {
-            client->write("REQUEST / NEVKA/1.0\r\n");
-            client->waitForBytesWritten();
-
-            if(client->waitForReadyRead(3000))
+            auto list = msg.split('\n');
+            for(auto i:list)
             {
-                auto list = client->readAll().split('\n');
-                for(auto i:list)
-                {
-                    if(i !="")
-                    ui->listWidget->addItem(i);
-                }
-                client->close();
+                if(i !="")
+                ui->listWidget->addItem(i);
             }
-            else
-            {
-                QMessageBox::critical(this,"Error", "No response.");
-            }
+        }
+        else
+        {
+            QMessageBox::critical(this,"Error", "Could not get pages.");
         }
 }
 
 QString MainWindow::ReceivePage(QString page,bool write)
 {
-    client->write("REQUEST "+page.toUtf8()+" NEVKA/1.0\r\n");
-    if(!client->waitForBytesWritten(3000))QMessageBox::critical(this,"Error", "Couldn't write to server.\n"+page);
-
-    if(client->waitForReadyRead(3000))
+    QString l = protocol.SendRequest(page);
+    if(l=="")
+        QMessageBox::critical(this,"Error", "No response. (\n"+page+")");
+    else
     {
-        QString l=client->readAll();
         if(write)
         ui->textBrowser->setHtml(l);
         return l;
     }
-    else
-    {
-        QMessageBox::critical(this,"Error", "No response.\n"+page);
-    }
     return "";
 }
-
-void MainWindow::SafeWrite(std::function<void()> func)
-{
-    if(client->isOpen())
-    {
-        client->close();
-    }
-    client->connectToHost("localhost",80);
-    if(client->waitForConnected(3000))func();
-    else QMessageBox::critical(this,"Error", "could not connect.");
-    client->close();
-}
-
 
 MainWindow::~MainWindow()
 {
@@ -84,8 +58,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
 {
-    auto l = [item,this](){ReceivePage(item->text());};
-    SafeWrite(l);
+    ReceivePage(item->text());
 }
 
 
@@ -122,9 +95,7 @@ void MainWindow::on_actionDownload_triggered()
     }
     QString str;
 
-
-    auto l = [&str,itemText,this](){str = ReceivePage(itemText,false);};
-    SafeWrite(l);
+    str = ReceivePage(itemText,false);
 
     file.write(str.toUtf8());
     file.close();
@@ -148,9 +119,7 @@ void MainWindow::on_actionSave_All_triggered()
         }
         QString str;
 
-
-        auto l = [&str,itemText,this](){str = ReceivePage(itemText,false);};
-        SafeWrite(l);
+        str = ReceivePage(itemText,false);
 
         file.write(str.toUtf8());
         file.close();

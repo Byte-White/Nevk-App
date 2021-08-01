@@ -43,6 +43,7 @@ void Server::newConnection()
 //    auto arg_connection = (list.length()<6?QStringList(""):list[6].split(":")) ;//Connection state
 //    qDebug()<<arg_connection[0]<<"::"<<arg_connection[1];
     HTTPParser parser(list);
+    QByteArray version = parser["VERSION"].toUtf8();
     if(parser.map.contains("GET"))
     {
         if(parser["GET"] == "/")
@@ -59,7 +60,7 @@ void Server::newConnection()
             {
                 dwn_page = "<h1>There was some kind of error.<h1><br><h6>we are working on it.</h6>";
             }
-            client->write("HTTP/1.1 200 Ok\r\n");
+            client->write(version+" 200 Ok\r\n");
             client->write("Content-Type: text/html\r\n");
             client->write(("Content-Length: "+ QString::number(dwn_page.length()) +"\r\n").toUtf8());
             client->write("Content-Type: text/html\r\n");
@@ -83,8 +84,8 @@ void Server::newConnection()
             {
                 dwn = "";
             }
-            if(dwn != "") client->write("HTTP/1.1 200 Ok\r\n");
-            else client->write("HTTP/1.1 404 Not Found\r\n");
+            if(dwn != "") client->write(version+" 200 Ok\r\n");
+            else client->write(version+" 404 Not Found\r\n");
             client->write("Content-Type: text/html\r\n");
             client->write(("Content-Length: "+ QString::number(dwn.length()) +"\r\n").toUtf8());
             client->write("Content-Type: text/rar\r\n");
@@ -94,7 +95,7 @@ void Server::newConnection()
         else
         {
             QString msg = "no...";
-            client->write("HTTP/1.1 200 Ok\r\n");
+            client->write(version+" 200 Ok\r\n");
             client->write("Content-Type: text/html\r\n");
             client->write(("Content-Length: "+ QString::number(msg.length()) +"\r\n").toUtf8());
             client->write("Content-Type: text/html\r\n");
@@ -104,6 +105,7 @@ void Server::newConnection()
     }
     else if(parser.map.contains("REQUEST"))
     {
+        //qDebug()<<"msg:"<<parser["REQUEST"];
         if(parser["REQUEST"] == "/")
         {
             QString list;
@@ -114,8 +116,10 @@ void Server::newConnection()
             {
                 auto f = filename.split('.');
                 list += f[0]+"\n";
+                //qDebug()<<list;
             }
             client->write(list.toUtf8());
+            client->flush();
         }
         else
         {

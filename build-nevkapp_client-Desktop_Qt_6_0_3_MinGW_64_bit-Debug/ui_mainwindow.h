@@ -11,6 +11,7 @@
 
 #include <QtCore/QVariant>
 #include <QtGui/QAction>
+#include <QtGui/QIcon>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDockWidget>
 #include <QtWidgets/QGridLayout>
@@ -45,6 +46,9 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
         MainWindow->resize(717, 583);
+        QIcon icon;
+        icon.addFile(QString::fromUtf8("../build-nevkapp_client-Desktop_Qt_6_0_3_MinGW_64_bit-Debug/resources/icon.jpg"), QSize(), QIcon::Normal, QIcon::Off);
+        MainWindow->setWindowIcon(icon);
         actionShow_Pages_View = new QAction(MainWindow);
         actionShow_Pages_View->setObjectName(QString::fromUtf8("actionShow_Pages_View"));
         actionDownload = new QAction(MainWindow);
