@@ -38,6 +38,7 @@
      <string>File</string>
     </property>
     <addaction name="actionShow_Pages_View"/>
+    <addaction name="actionRefresh_Pages_View"/>
     <addaction name="separator"/>
     <addaction name="actionSave_All"/>
     <addaction name="actionDownload"/>
@@ -72,6 +73,9 @@
    <property name="text">
     <string>Show/Hide Pages View</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
+   </property>
   </action>
   <action name="actionDownload">
    <property name="text">
@@ -86,6 +90,14 @@
   <action name="actionSave_All">
    <property name="text">
     <string>Download All Pages</string>
+   </property>
+  </action>
+  <action name="actionRefresh_Pages_View">
+   <property name="text">
+    <string>Refresh Pages View</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>

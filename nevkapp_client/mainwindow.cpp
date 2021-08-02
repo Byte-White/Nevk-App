@@ -3,6 +3,8 @@
 #include <QMessageBox>
 #include <QFileDialog>
 
+#include "appdata.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),client(new QTcpSocket(this)),protocol(client)
     , ui(new Ui::MainWindow)
@@ -17,9 +19,19 @@ MainWindow::MainWindow(QWidget *parent)
     //ui->dockWidget->setWindowTitle("Pages");
 
 
+    /*---window setup---*/
     QIcon icon("icon.jpg");
     setWindowIcon(icon);
 
+}
+
+//void MainWindow::Setup(){}
+
+void MainWindow::LoadPagesInfo()
+{
+    ui->listWidget->clear();
+    if(AppData::Mode())
+    {
         QString msg = protocol.SendRequest("/");//Gets all files list.
         if(msg != "")
         {
@@ -34,20 +46,46 @@ MainWindow::MainWindow(QWidget *parent)
         {
             QMessageBox::critical(this,"Error", "Could not get pages.");
         }
+    }
+    else
+    {
+        QDir directory(AppData::SavedPagesPath());
+        QStringList files = directory.entryList(QStringList() << "*.html" ,QDir::Files);
+        for(QString filename: files)
+        {
+            ui->listWidget->addItem(filename);
+        }
+    }
 }
 
 QString MainWindow::ReceivePage(QString page,bool write)
 {
-    QString l = protocol.SendRequest(page);
-    if(l=="")
-        QMessageBox::critical(this,"Error", "No response. (\n"+page+")");
+    if(AppData::Mode())
+    {
+        QString l = protocol.SendRequest(page);
+        if(l=="")
+            QMessageBox::critical(this,"Error", "No response. (\n"+page+")");
+        else
+        {
+            if(write)
+            ui->textBrowser->setHtml(l);
+            return l;
+        }
+    }
     else
     {
-        if(write)
-        ui->textBrowser->setHtml(l);
-        return l;
+        QFile f(AppData::SavedPagesPath() + page);
+        f.open(QFile::ReadOnly);
+        if(f.isOpen())
+        {
+            QString msg = f.readAll();
+            if(write)
+                ui->textBrowser->setHtml(msg);
+            return msg;
+            f.close();
+        }
     }
-    return "";
+    return "<center><h1>404 NOT FOUND</h1></center>";
 }
 
 MainWindow::~MainWindow()
@@ -85,7 +123,7 @@ void MainWindow::on_actionDownload_triggered()
         return;
     }
     QFileDialog dialog;
-    QString filename = dialog.getSaveFileName(this,"Save File - "+itemText,QCoreApplication::applicationDirPath()+"/saved","HTML (*.html)");
+    QString filename = dialog.getSaveFileName(this,"Save File - "+itemText,AppData::SavedPagesPath(),"HTML (*.html)");
     QFile file(filename);
     file.open(QFile::WriteOnly);
     if(!file.isOpen())
@@ -109,7 +147,7 @@ void MainWindow::on_actionSave_All_triggered()
     {
         QString itemText = ui->listWidget->item(i)->text();
         QFileDialog dialog;
-        QString filename = dialog.getSaveFileName(this,"Save File - " + itemText,QCoreApplication::applicationDirPath()+"/saved","HTML (*.html)");
+        QString filename = dialog.getSaveFileName(this,"Save File - " + itemText,AppData::SavedPagesPath(),"HTML (*.html)");
         QFile file(filename);
         file.open(QFile::WriteOnly);
         if(!file.isOpen())
@@ -124,5 +162,11 @@ void MainWindow::on_actionSave_All_triggered()
         file.write(str.toUtf8());
         file.close();
     }
+}
+
+
+void MainWindow::on_actionRefresh_Pages_View_triggered()
+{
+    LoadPagesInfo();
 }
 

@@ -31,6 +31,7 @@ public:
     QAction *actionDownload;
     QAction *actionExit;
     QAction *actionSave_All;
+    QAction *actionRefresh_Pages_View;
     QWidget *centralwidget;
     QGridLayout *gridLayout;
     QTextBrowser *textBrowser;
@@ -57,6 +58,8 @@ public:
         actionExit->setObjectName(QString::fromUtf8("actionExit"));
         actionSave_All = new QAction(MainWindow);
         actionSave_All->setObjectName(QString::fromUtf8("actionSave_All"));
+        actionRefresh_Pages_View = new QAction(MainWindow);
+        actionRefresh_Pages_View->setObjectName(QString::fromUtf8("actionRefresh_Pages_View"));
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         gridLayout = new QGridLayout(centralwidget);
@@ -92,6 +95,7 @@ public:
 
         menubar->addAction(menuFile->menuAction());
         menuFile->addAction(actionShow_Pages_View);
+        menuFile->addAction(actionRefresh_Pages_View);
         menuFile->addSeparator();
         menuFile->addAction(actionSave_All);
         menuFile->addAction(actionDownload);
@@ -107,9 +111,16 @@ public:
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MainWindow", nullptr));
         actionShow_Pages_View->setText(QCoreApplication::translate("MainWindow", "Show/Hide Pages View", nullptr));
+#if QT_CONFIG(shortcut)
+        actionShow_Pages_View->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+H", nullptr));
+#endif // QT_CONFIG(shortcut)
         actionDownload->setText(QCoreApplication::translate("MainWindow", "Download Selected Page", nullptr));
         actionExit->setText(QCoreApplication::translate("MainWindow", "Exit", nullptr));
         actionSave_All->setText(QCoreApplication::translate("MainWindow", "Download All Pages", nullptr));
+        actionRefresh_Pages_View->setText(QCoreApplication::translate("MainWindow", "Refresh Pages View", nullptr));
+#if QT_CONFIG(shortcut)
+        actionRefresh_Pages_View->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+R", nullptr));
+#endif // QT_CONFIG(shortcut)
         menuFile->setTitle(QCoreApplication::translate("MainWindow", "File", nullptr));
         dockWidget->setWindowTitle(QCoreApplication::translate("MainWindow", "Pages", nullptr));
     } // retranslateUi

@@ -19,6 +19,9 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+    void LoadPagesInfo();
+
 private slots:
     void on_listWidget_itemDoubleClicked(QListWidgetItem *item);
 
@@ -30,8 +33,11 @@ private slots:
 
     void on_actionSave_All_triggered();
 
+    void on_actionRefresh_Pages_View_triggered();
+
 private:
     QString ReceivePage(QString page,bool write = true);
+
 private:
     Ui::MainWindow *ui;
     QTcpSocket* client;
