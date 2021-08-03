@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QDir>
 #include "httpparser.h"
+#include "httpprotocol.h"
 
 Server::Server()
 {
@@ -34,7 +35,6 @@ void Server::newConnection()
         qDebug()<<"Time out! no response.";
         return;
     }
-    read_request:
     QString req = client->readAll();//requests files
     //send files
     qDebug()<<req;
@@ -43,6 +43,7 @@ void Server::newConnection()
 //    auto arg_connection = (list.length()<6?QStringList(""):list[6].split(":")) ;//Connection state
 //    qDebug()<<arg_connection[0]<<"::"<<arg_connection[1];
     HTTPParser parser(list);
+    HTTPProtocol protocol(client,&parser);
     QByteArray version = parser["VERSION"].toUtf8();
     if(parser.map.contains("GET"))
     {
@@ -60,14 +61,12 @@ void Server::newConnection()
             {
                 dwn_page = "<h1>There was some kind of error.<h1><br><h6>we are working on it.</h6>";
             }
-            client->write(version+" 200 Ok\r\n");
-            client->write("Connection: close\r\n");
-            client->write("Content-Type: text/html\r\n");
-            client->write(("Content-Length: "+ QString::number(dwn_page.length()) +"\r\n").toUtf8());
-            client->write("Content-Type: text/html\r\n");
-            client->write("\r\n");
+            protocol["STATUS"]<<"200 Ok";
+            protocol["Connection"]<<"close";
+            protocol["Content-Type"]<<"text/html";
+            protocol["Content-Length"]<<QString::number(dwn_page.length());
+            protocol.End();
             client->write(dwn_page.toUtf8());
-            if(parser["Connection"]=="keep-alive")goto read_request;
         }
         else if(parser["GET"] == "/installer.rar")
         {
@@ -75,35 +74,34 @@ void Server::newConnection()
             //Browser request. Download installer.
             QFile file("installer.rar");
             file.open(QFile::ReadOnly);
-            QByteArray dwn;
+            QByteArray dwn_page;
             if(file.isOpen())
             {
-                dwn = file.readAll();
+                dwn_page = file.readAll();
                 file.close();
             }
             else
             {
-                dwn = "";
+                dwn_page = "";
             }
-            if(dwn != "") client->write(version+" 200 Ok\r\n");
-            else client->write(version+" 404 Not Found\r\n");
-            client->write("Connection: close\r\n");
-            client->write("Content-Type: text/html\r\n");
-            client->write(("Content-Length: "+ QString::number(dwn.length()) +"\r\n").toUtf8());
-            client->write("Content-Type: text/rar\r\n");
-            client->write("\r\n");
-            client->write(dwn);
+            if(dwn_page != "")
+            protocol["STATUS"]<<"200 Ok";
+            else protocol["STATUS"]<<"404 Not Found";
+            protocol["Connection"]<<"close";
+            protocol["Content-Type"]<<"text/rar";
+            protocol["Content-Length"]<<QString::number(dwn_page.length());
+            protocol.End();
+            client->write(dwn_page);
         }
         else
         {
-            QString msg = "no...";
-            client->write(version+" 200 Ok\r\n");
-            client->write("Connection: close\r\n");
-            client->write("Content-Type: text/html\r\n");
-            client->write(("Content-Length: "+ QString::number(msg.length()) +"\r\n").toUtf8());
-            client->write("Content-Type: text/html\r\n");
-            client->write("\r\n");
-            client->write(msg.toUtf8());
+            QString dwn_page = "no...";
+            protocol["STATUS"]<<"200 Ok";
+            protocol["Connection"]<<"close";
+            protocol["Content-Type"]<<"text/html";
+            protocol["Content-Length"]<<QString::number(dwn_page.length());
+            protocol.End();
+            client->write(dwn_page.toUtf8());
         }
     }
     else if(parser.map.contains("REQUEST"))

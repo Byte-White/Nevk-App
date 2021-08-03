@@ -10,6 +10,7 @@ CONFIG -= app_bundle
 
 SOURCES += \
         httpparser.cpp \
+        httpprotocol.cpp \
         main.cpp \
         server.cpp
 
@@ -20,4 +21,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     httpparser.h \
+    httpprotocol.h \
     server.h
