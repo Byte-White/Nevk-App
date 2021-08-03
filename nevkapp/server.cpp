@@ -61,6 +61,7 @@ void Server::newConnection()
                 dwn_page = "<h1>There was some kind of error.<h1><br><h6>we are working on it.</h6>";
             }
             client->write(version+" 200 Ok\r\n");
+            client->write("Connection: close\r\n");
             client->write("Content-Type: text/html\r\n");
             client->write(("Content-Length: "+ QString::number(dwn_page.length()) +"\r\n").toUtf8());
             client->write("Content-Type: text/html\r\n");
@@ -86,6 +87,7 @@ void Server::newConnection()
             }
             if(dwn != "") client->write(version+" 200 Ok\r\n");
             else client->write(version+" 404 Not Found\r\n");
+            client->write("Connection: close\r\n");
             client->write("Content-Type: text/html\r\n");
             client->write(("Content-Length: "+ QString::number(dwn.length()) +"\r\n").toUtf8());
             client->write("Content-Type: text/rar\r\n");
@@ -96,6 +98,7 @@ void Server::newConnection()
         {
             QString msg = "no...";
             client->write(version+" 200 Ok\r\n");
+            client->write("Connection: close\r\n");
             client->write("Content-Type: text/html\r\n");
             client->write(("Content-Length: "+ QString::number(msg.length()) +"\r\n").toUtf8());
             client->write("Content-Type: text/html\r\n");
